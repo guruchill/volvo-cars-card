@@ -83,6 +83,7 @@ Use the visual editor (**Edit dashboard → Add card → Volvo Cars Card**) to a
 | `layout` | string | `"auto"` | `"auto"` wraps to a single column when the dashboard column is too narrow; `"horizontal"` forces one column per vehicle, side by side, regardless of width; `"vertical"` always stacks vehicles in one column |
 | `title` | string | *(none — auto-translated, "Volvo Cars"/"Volvo Cars")* | Card header text. Set to an empty string to hide the header row entirely. |
 | `section_order` | list of strings | *(the order below)* | Controls the order of the sections below each vehicle's pinned hero (name/battery-fuel ring/quick actions, which is always first). Valid ids: `doors`, `charging`, `service`, `trip`, `position`, `stats`, `distance`, `lease` — default order is exactly that list. Applies to every vehicle in the card. A section a given vehicle doesn't have data for is skipped when rendering regardless of its position; an unknown id is ignored, and any id you leave out is appended after the ones you listed, so nothing is ever silently dropped. Easiest to set from the visual editor's "Section order" list (↑/↓ buttons) rather than by hand. |
+| `hidden_sections` | list of strings | `[]` | Sections to hide entirely (same ids as `section_order`: `doors`, `charging`, `service`, `trip`, `position`, `stats`, `distance`, `lease`). Hidden sections are not rendered and their data is not fetched. Unknown ids are ignored. Easiest to set with the checkbox on each row of the visual editor's "Section order" list. `show_stats: false` still hides `stats` and `distance` as before. |
 
 ```yaml
 type: custom:volvo-cars-card
@@ -187,6 +188,10 @@ No extrapolation and no tolerance band involved — just that day's actual dista
 ---
 
 ## Changelog
+
+### Unreleased (beta-1.0.1)
+
+- **Choose which sections are shown** ([#10](https://github.com/johro897/volvo-cars-card/issues/10)): new `hidden_sections` option and a visibility checkbox on each row of the editor's Section order list. Existing configs are unchanged.
 
 ### 1.0.0 (2026-09-21) — First stable release
 
