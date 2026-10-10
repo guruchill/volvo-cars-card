@@ -190,7 +190,7 @@ No extrapolation and no tolerance band involved — just that day's actual dista
 
 ## Changelog
 
-### Unreleased (beta-1.0.1)
+### Unreleased (beta-1.0.3)
 
 - **Choose which sections are shown** ([#10](https://github.com/johro897/volvo-cars-card/issues/10)): new `hidden_sections` option and a visibility checkbox on each row of the editor's Section order list. Existing configs are unchanged.
 - **Hide the quick-action buttons** ([#11](https://github.com/johro897/volvo-cars-card/issues/11)): new `show_actions` option (default `true`) with an editor checkbox.
