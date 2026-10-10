@@ -194,6 +194,7 @@ No extrapolation and no tolerance band involved — just that day's actual dista
 
 - **Choose which sections are shown** ([#10](https://github.com/johro897/volvo-cars-card/issues/10)): new `hidden_sections` option and a visibility checkbox on each row of the editor's Section order list. Existing configs are unchanged.
 - **Hide the quick-action buttons** ([#11](https://github.com/johro897/volvo-cars-card/issues/11)): new `show_actions` option (default `true`) with an editor checkbox.
+- **Multi-column layout on wide cards** ([#12](https://github.com/johro897/volvo-cars-card/issues/12)): each vehicle now spreads its hero and sections over 2 columns (vehicle width ≥ 560 px) or 3 columns (≥ 840 px), flowing in `section_order`, so a full-width dashboard no longer needs scrolling. Narrow widths (phones, narrow dashboard columns) look exactly as before. No new option.
 
 ### 1.0.0 (2026-09-21) — First stable release
 

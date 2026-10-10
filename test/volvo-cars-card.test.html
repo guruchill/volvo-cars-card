@@ -540,6 +540,28 @@ cardVertical.hass = hass;
 const gridV = cardVertical.shadowRoot.querySelector(".vc-grid");
 assert("layout: vertical forces a single stacked column", gridV.style.gridTemplateColumns === "1fr");
 
+// --- Multi-column wide layout (#12) ---
+const bodyEl = card.shadowRoot.querySelector(".vc-vehicle > .vc-vehicle-body");
+assert("each vehicle wraps hero + sections in .vc-vehicle-body", !!bodyEl && bodyEl.firstElementChild.classList.contains("vc-hero"));
+const vehicleStyle = getComputedStyle(card.shadowRoot.querySelector(".vc-vehicle"));
+assert(".vc-vehicle is an inline-size container", vehicleStyle.containerType === "inline-size");
+const colsAt = (px) => {
+  const c = document.createElement("volvo-cars-card");
+  c.style.display = "block";
+  c.style.width = px + "px";
+  stage.appendChild(c);
+  c.setConfig({ vehicles: [{ device_id: "dev_xc60" }] });
+  c.hass = hass;
+  const b = c.shadowRoot.querySelector(".vc-vehicle-body");
+  const out = { count: getComputedStyle(b).columnCount, display: getComputedStyle(b).display };
+  c.remove();
+  return out;
+};
+const narrowCols = colsAt(320);
+assert("narrow card keeps the original single flex column", narrowCols.display === "flex" && narrowCols.count === "auto");
+assert("medium card (~600px) uses 2 columns", colsAt(640).count === "2");
+assert("wide card (~1000px) uses 3 columns", colsAt(1000).count === "3");
+
 // --- section_order option test (owner-requested, 2026-09-21) ---
 const defaultOrderHtml = card.shadowRoot.querySelectorAll(".vc-vehicle")[0].innerHTML;
 assert("with no section_order configured, sections still render in the original default order (no regression)", defaultOrderHtml.indexOf("vc-doors-row") < defaultOrderHtml.indexOf("vc-charging"));

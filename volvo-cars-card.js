@@ -903,18 +903,20 @@
 
       return `
         <div class="vc-vehicle">
-          <div class="vc-hero" style="--vc-glow:${glowVar};">
-            <div class="vc-glow"></div>
-            ${pictureHtml}
-            <div class="vc-hero-name">
-              ${iconHtml}
-              <span class="vc-vehicle-name">${name}</span>
-              <span class="vc-type-pill">${isEv ? "EV" : (fuel ? "ICE" : "")}</span>
+          <div class="vc-vehicle-body">
+            <div class="vc-hero" style="--vc-glow:${glowVar};">
+              <div class="vc-glow"></div>
+              ${pictureHtml}
+              <div class="vc-hero-name">
+                ${iconHtml}
+                <span class="vc-vehicle-name">${name}</span>
+                <span class="vc-type-pill">${isEv ? "EV" : (fuel ? "ICE" : "")}</span>
+              </div>
+              ${heroValueHtml}
+              ${buttonsHtml}
             </div>
-            ${heroValueHtml}
-            ${buttonsHtml}
+            ${sectionsHtml}
           </div>
-          ${sectionsHtml}
         </div>`;
     }
 
@@ -1800,7 +1802,20 @@
           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: 16px;
         }
-        .vc-vehicle { display: flex; flex-direction: column; gap: 12px; }
+        /* .vc-vehicle is the size container so the layout reacts to the width
+           each vehicle actually gets (full-width card, or one of several
+           side by side), not the viewport. Narrow = the original single
+           column, unchanged. Wider = CSS columns: hero first, sections flow
+           down column 1, then 2, then 3 in section_order (#12). */
+        .vc-vehicle { container-type: inline-size; }
+        .vc-vehicle-body { display: flex; flex-direction: column; gap: 12px; }
+        @container (min-width: 560px) {
+          .vc-vehicle-body { display: block; column-count: 2; column-gap: 16px; }
+          .vc-vehicle-body > * { break-inside: avoid; margin-bottom: 12px; }
+        }
+        @container (min-width: 840px) {
+          .vc-vehicle-body { column-count: 3; }
+        }
         .vc-hero {
           position: relative;
           border-radius: 16px;
