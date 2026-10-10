@@ -706,6 +706,21 @@ assert("a section listed in hidden_sections is not rendered", !hiddenHtml.includ
 assert("other sections still render when one is hidden", hiddenHtml.includes("vc-charging"));
 assert("with no hidden_sections the doors section still renders (no regression)", defaultOrderHtml.includes("vc-doors-row"));
 
+// --- show_actions (issue #11) ---
+const cardNoActions = document.createElement("volvo-cars-card");
+stage.appendChild(cardNoActions);
+cardNoActions.setConfig({ vehicles: [{ device_id: "dev_xc60" }], show_actions: false });
+cardNoActions.hass = hass;
+const noActionsHtml = cardNoActions.shadowRoot.querySelectorAll(".vc-vehicle")[0].innerHTML;
+assert("show_actions: false removes the quick-action buttons", !noActionsHtml.includes("vc-action-btn") && !noActionsHtml.includes('class="vc-actions"'));
+assert("show_actions: false keeps the status line", noActionsHtml.includes("vc-status-line"));
+assert("buttons render by default (no regression)", defaultOrderHtml.includes("vc-action-btn"));
+const actionsToggle = editor.shadowRoot.querySelector('[data-field="show_actions"]');
+assert("editor has a show_actions checkbox, checked by default", !!actionsToggle && actionsToggle.checked);
+actionsToggle.checked = false;
+actionsToggle.dispatchEvent(new Event("change", { bubbles: true }));
+assert("unchecking it fires config-changed with show_actions: false", lastConfig.show_actions === false);
+
 // --- Render summary ------------------------------------------------
 const list = document.getElementById("results");
 results.forEach((r) => {

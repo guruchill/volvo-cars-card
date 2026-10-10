@@ -121,6 +121,7 @@
       editor_icon: "Icon (optional)",
       editor_picture: "Photo URL (optional)",
       editor_show_stats: "Show statistics",
+      editor_show_actions: "Show quick-action buttons",
       editor_stats_hours: "Statistics window (hours)",
       editor_select_device: "Select a device…",
       editor_layout: "Layout",
@@ -255,6 +256,7 @@
       editor_icon: "Ikon (valfritt)",
       editor_picture: "Bild-URL (valfritt)",
       editor_show_stats: "Visa statistik",
+      editor_show_actions: "Visa snabbknappar",
       editor_stats_hours: "Statistikfönster (timmar)",
       editor_select_device: "Välj en enhet…",
       editor_layout: "Layout",
@@ -417,7 +419,7 @@
     }
 
     static getStubConfig() {
-      return { vehicles: [], show_stats: true, layout: "auto", section_order: DEFAULT_SECTION_ORDER, hidden_sections: [] };
+      return { vehicles: [], show_stats: true, show_actions: true, layout: "auto", section_order: DEFAULT_SECTION_ORDER, hidden_sections: [] };
     }
 
     constructor() {
@@ -454,6 +456,7 @@
         // header row entirely; anything else is shown verbatim.
         title: typeof config.title === "string" ? config.title : null,
         show_stats: config.show_stats !== false,
+        show_actions: config.show_actions !== false,
         stats_history_hours: Math.min(
           MAX_STATS_HOURS,
           Math.max(1, parseInt(config.stats_history_hours, 10) || DEFAULT_STATS_HOURS)
@@ -810,7 +813,10 @@
       const armedRing = (key) => armed === key ? `box-shadow:0 0 0 2px var(--primary-color);` : "";
       const dev = escHtml(vehicle.device_id);
 
+      // `show_actions: false` drops the buttons and their confirm rows; the
+      // lock/climate/engine status line below always stays.
       const buttonsHtml = `
+        ${this._config.show_actions ? `
         <div class="vc-actions">
           ${d.lock ? `
             <button class="vc-action-btn" data-action="arm" data-arm="lock" data-device="${dev}"
@@ -860,7 +866,7 @@
             ${d.buttons.honk ? `<button class="vc-confirm-chip" data-action="honk-horn" data-device="${dev}">${escHtml(t(hass, "honk_horn"))}</button>` : ""}
             ${d.buttons.flash ? `<button class="vc-confirm-chip" data-action="honk-lights" data-device="${dev}">${escHtml(t(hass, "honk_lights"))}</button>` : ""}
             ${d.buttons.honk_flash ? `<button class="vc-confirm-chip" data-action="honk-both" data-device="${dev}">${escHtml(t(hass, "honk_both"))}</button>` : ""}
-          </div>` : ""}
+          </div>` : ""}` : ""}
         <div class="vc-status-line">
           <span style="color:${lockColorVar};">${escHtml(lockLabel)}</span>
           ${climateAvailable && climateOn ? `<span class="vc-status-sep">·</span><span style="color:var(--info-color, var(--primary-color));">${escHtml(t(hass, "climate_on"))}</span>` : ""}
@@ -1904,7 +1910,7 @@
       super();
       this.attachShadow({ mode: "open" });
       this._hass = null;
-      this._config = { vehicles: [], show_stats: true, stats_history_hours: DEFAULT_STATS_HOURS, section_order: DEFAULT_SECTION_ORDER, hidden_sections: [] };
+      this._config = { vehicles: [], show_stats: true, show_actions: true, stats_history_hours: DEFAULT_STATS_HOURS, section_order: DEFAULT_SECTION_ORDER, hidden_sections: [] };
       this.shadowRoot.addEventListener("click", (e) => this._onClick(e));
       this.shadowRoot.addEventListener("change", (e) => this._onFieldChange(e));
     }
@@ -1918,6 +1924,7 @@
         ...config,
         title: typeof config?.title === "string" ? config.title : null,
         show_stats: config?.show_stats !== false,
+        show_actions: config?.show_actions !== false,
         stats_history_hours: config?.stats_history_hours || DEFAULT_STATS_HOURS,
         layout: LAYOUT_VALUES.includes(config?.layout) ? config.layout : "auto",
         section_order: normalizeSectionOrder(config?.section_order),
@@ -2000,6 +2007,8 @@
         this._config.title = el.value;
       } else if (field === "show_stats") {
         this._config.show_stats = el.checked;
+      } else if (field === "show_actions") {
+        this._config.show_actions = el.checked;
       } else if (field === "stats_history_hours") {
         this._config.stats_history_hours = parseInt(el.value, 10) || DEFAULT_STATS_HOURS;
       } else if (field === "layout") {
@@ -2121,6 +2130,10 @@
           <div class="ed-toggle-row">
             <input type="checkbox" data-field="show_stats" ${this._config.show_stats ? "checked" : ""} />
             <span class="ed-label">${escHtml(t(hass, "editor_show_stats"))}</span>
+          </div>
+          <div class="ed-toggle-row">
+            <input type="checkbox" data-field="show_actions" ${this._config.show_actions ? "checked" : ""} />
+            <span class="ed-label">${escHtml(t(hass, "editor_show_actions"))}</span>
           </div>
           <div class="ed-toggle-row">
             <span class="ed-label">${escHtml(t(hass, "editor_stats_hours"))}</span>

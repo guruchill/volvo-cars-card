@@ -79,6 +79,7 @@ Use the visual editor (**Edit dashboard → Add card → Volvo Cars Card**) to a
 |---|---|---|---|
 | `vehicles` | list | **required**, at least one | Each entry: `device_id` (required, the HA device for that Volvo), `name` (optional display name override), `icon` (optional, e.g. `mdi:car-electric`, shown next to the name), `picture` (optional image URL shown above the name, e.g. `/local/xc60.jpg`), `lease_annual_limit_km` (optional, enables the Lease budget section, e.g. `20000`), `lease_start_date` (required if the limit is set, `YYYY-MM-DD` — the lease's anniversary date, recomputed every year), `lease_start_odometer_km` (optional but recommended — the odometer reading at the start of the *current* lease year; if omitted, the card tries to auto-detect it from Home Assistant's long-term statistics for the odometer sensor), `lease_pace_tolerance_pct` (optional, default `3` — how many percent of the annual limit counts as "on pace" before the status flips to over/under), `lease_pace_basis` (optional, default `"today"` — `"today"` compares usage-so-far to a proportional target, `"projected"` compares the extrapolated year-end total to the limit instead, `"remaining_rate"` compares your actual recent daily average to the recalculated remaining daily budget) |
 | `show_stats` | boolean | `true` | Show the consumption sparkline section |
+| `show_actions` | boolean | `true` | Show the quick-action buttons (lock, climate, horn/lights, engine) in the hero. `false` hides them and their confirm rows; the lock/climate status text stays. |
 | `stats_history_hours` | integer | `168` (7 days) | How far back the consumption sparkline looks |
 | `layout` | string | `"auto"` | `"auto"` wraps to a single column when the dashboard column is too narrow; `"horizontal"` forces one column per vehicle, side by side, regardless of width; `"vertical"` always stacks vehicles in one column |
 | `title` | string | *(none — auto-translated, "Volvo Cars"/"Volvo Cars")* | Card header text. Set to an empty string to hide the header row entirely. |
@@ -192,6 +193,7 @@ No extrapolation and no tolerance band involved — just that day's actual dista
 ### Unreleased (beta-1.0.1)
 
 - **Choose which sections are shown** ([#10](https://github.com/johro897/volvo-cars-card/issues/10)): new `hidden_sections` option and a visibility checkbox on each row of the editor's Section order list. Existing configs are unchanged.
+- **Hide the quick-action buttons** ([#11](https://github.com/johro897/volvo-cars-card/issues/11)): new `show_actions` option (default `true`) with an editor checkbox.
 
 ### 1.0.0 (2026-09-21) — First stable release
 
