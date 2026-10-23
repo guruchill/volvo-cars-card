@@ -188,7 +188,7 @@ No extrapolation and no tolerance band involved — just that day's actual dista
 
 ## Changelog
 
-### Unreleased
+### Unreleased (beta-1.0.4)
 
 - **Distances follow your entities' unit** ([#13](https://github.com/johro897/volvo-cars-card/issues/13)): odometer, distance to service, trip meters, average speed and range no longer assume `km` — they show the unit and display precision of the entity itself (e.g. miles for a UK vehicle). The Lease budget and Distance driven sections use the odometer's unit too, so `lease_annual_limit_km` and `lease_start_odometer_km` are read in whatever unit the odometer reports (the option names keep `_km`). The consumption stat no longer shows raw values like `17.3999996185303`.
 
