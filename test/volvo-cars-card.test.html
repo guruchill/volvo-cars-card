@@ -718,6 +718,60 @@ titleInput.value = "Our Cars";
 titleInput.dispatchEvent(new Event("change", { bubbles: true }));
 assert("changing the title input fires config-changed with the new value", lastConfig.title === "Our Cars");
 
+// --- #13: distances follow the entity's own unit; values follow its display
+// precision. A UK owner reported miles being labelled "km" everywhere and a
+// raw 17.3999996185303 in the consumption stat. ---
+const ukStates = {
+  ...states,
+  "sensor.xc60_range_battery": state("sensor.xc60_range_battery", "255", { unit_of_measurement: "mi" }),
+  "sensor.xc60_odometer": state("sensor.xc60_odometer", "11445", { unit_of_measurement: "mi" }),
+  "sensor.xc60_trip_manual": state("sensor.xc60_trip_manual", "88.5", { unit_of_measurement: "mi" }),
+  "sensor.xc60_trip_speed_manual": state("sensor.xc60_trip_speed_manual", "23.7", { unit_of_measurement: "mph" }),
+  "sensor.xc60_avg_energy": state("sensor.xc60_avg_energy", "17.3999996185303", { unit_of_measurement: "kWh/100km" }),
+  "sensor.v60_range_tank": state("sensor.v60_range_tank", "348", { unit_of_measurement: "mi" }),
+  "sensor.v60_distance_to_service": state("sensor.v60_distance_to_service", "745", { unit_of_measurement: "mi" }),
+};
+const ukHass = { ...hass, states: ukStates };
+
+const cardUk = document.createElement("volvo-cars-card");
+stage.appendChild(cardUk);
+cardUk.setConfig({
+  vehicles: [
+    { device_id: "dev_xc60", lease_annual_limit_km: 8000, lease_start_date: "2026-01-01", lease_start_odometer_km: 2000 },
+    { device_id: "dev_v60" },
+  ],
+});
+cardUk.hass = ukHass;
+["dev_xc60:service", "dev_xc60:trip", "dev_xc60:lease", "dev_v60:service"].forEach((k) => cardUk._expanded.set(k, true));
+cardUk._odoHistory.set("dev_xc60", { distances: [30, 60, 40, 80, 20, 70, 50], fetchedAt: Date.now(), fetching: false });
+cardUk._render();
+const ukV = cardUk.shadowRoot.querySelectorAll(".vc-vehicle");
+assert("#13: EV range on the ring uses the entity's unit (255 mi), not km", ukV[0].innerHTML.includes("255 mi") && !ukV[0].innerHTML.includes("255 km"));
+assert("#13: fuel range uses the entity's unit (348 mi)", ukV[1].innerHTML.includes("348 mi") && !ukV[1].innerHTML.includes("348 km"));
+assert("#13: odometer row uses the entity's unit (11445 mi)", ukV[0].innerHTML.includes("11445 mi"));
+assert("#13: distance-to-service row uses the entity's unit (745 mi)", ukV[1].innerHTML.includes("745 mi"));
+assert("#13: trip meter uses the entity's unit (88.5 mi)", ukV[0].innerHTML.includes("88.5 mi"));
+assert("#13: average speed uses the entity's unit (23.7 mph), not km/h", ukV[0].innerHTML.includes("23.7 mph") && !ukV[0].innerHTML.includes("km/h"));
+assert("#13: consumption stat is rounded instead of printing the raw float (17.4, not 17.3999996185303)", ukV[0].innerHTML.includes("17.4 kWh/100km") && !ukV[0].innerHTML.includes("17.3999996"));
+const ukLeaseHtml = ukV[0].querySelector('[data-action="toggle-section"][data-section="lease"]').closest(".vc-section").innerHTML;
+assert("#13: lease section shows the odometer's unit (mi) in summary (over the limit, so independent of today's date), tiles, chart labels and bars", /\d+ mi over the limit/.test(ukLeaseHtml) && ukLeaseHtml.includes("mi left this year") && ukLeaseHtml.includes("Target 8000 mi") && ukLeaseHtml.includes("mi/day avg") && ukLeaseHtml.includes("mi vs. target"));
+assert("#13: lease section has no leftover 'km'", !/\bkm\b/.test(ukLeaseHtml.replace(/<title>[^<]*<\/title>/g, "")));
+assert("#13: lease bar hover titles use the unit (80 mi)", Array.from(ukV[0].querySelectorAll("svg title")).some((el) => el.textContent.includes("80 mi")));
+const ukDistanceTitle = Array.from(ukV[0].querySelectorAll(".vc-section-title")).find((el) => el.textContent.includes("Distance driven"));
+assert("#13: Distance driven chart axis uses the unit (0–92 mi)", ukDistanceTitle.closest(".vc-section").querySelector(".vc-chart-yaxis").textContent.includes("92 mi"));
+
+// With a real HA formatter available, the card defers to it (unit AND display precision).
+const fmtCalls = [];
+const fmtHass = { ...ukHass, formatEntityState: (st) => { fmtCalls.push(st.entity_id); return `HA[${st.entity_id}]`; } };
+cardUk.hass = fmtHass;
+cardUk._render();
+const fmtV = cardUk.shadowRoot.querySelectorAll(".vc-vehicle");
+assert("#13: when hass.formatEntityState exists, stats/odometer/trip/range come from it", ["sensor.xc60_avg_energy", "sensor.xc60_odometer", "sensor.xc60_trip_manual", "sensor.xc60_range_battery"].every((id) => fmtV[0].innerHTML.includes(`HA[${id}]`)));
+assert("#13: days/hours rows keep the card's own translated unit (not routed through the formatter)", !fmtCalls.includes("sensor.v60_time_to_service"));
+
+// Default is unchanged: km entities still render as km.
+assert("#13: km entities still render as km (regression)", vehicles[1].innerHTML.includes("560 km"));
+
 // --- hidden_sections card test (issue #10) ---
 const cardHidden = document.createElement("volvo-cars-card");
 stage.appendChild(cardHidden);

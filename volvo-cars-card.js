@@ -57,33 +57,33 @@
       distance_trend: "Distance driven · last {days}d",
       lease_budget: "Lease budget",
       lease_waiting: "Collecting data…",
-      lease_over_limit: "{km} km over the limit",
-      lease_over_pace: "{km} km over pace",
-      lease_under_pace: "{km} km under pace",
-      lease_over_pace_projected: "Projected {km} km over by year end",
-      lease_under_pace_projected: "Projected {km} km under by year end",
-      lease_over_pace_rate: "Driving {km} km/day above your remaining budget",
-      lease_under_pace_rate: "Driving {km} km/day under your remaining budget",
+      lease_over_limit: "{km} {unit} over the limit",
+      lease_over_pace: "{km} {unit} over pace",
+      lease_under_pace: "{km} {unit} under pace",
+      lease_over_pace_projected: "Projected {km} {unit} over by year end",
+      lease_under_pace_projected: "Projected {km} {unit} under by year end",
+      lease_over_pace_rate: "Driving {km} {unit}/day above your remaining budget",
+      lease_under_pace_rate: "Driving {km} {unit}/day under your remaining budget",
       lease_on_pace: "On pace",
-      lease_km_left: "km left this year",
+      lease_km_left: "{unit} left this year",
       lease_days_left: "days left in lease year",
       lease_rest_days_inline: " · {days} rest day(s) needed",
       lease_rest_days_label: "rest days needed",
       lease_chart_title: "Annual usage vs. budget",
-      lease_target: "Target {km} km",
-      lease_projection: "~{km} km at this rate ({delta} vs. target)",
+      lease_target: "Target {km} {unit}",
+      lease_projection: "~{km} {unit} at this rate ({delta} vs. target)",
       lease_collecting_projection_note: " · Collecting more data before projecting (day {day} of {total})",
       lease_start_label: "Start",
       lease_today_label: "Today",
       lease_end_label: "End",
       lease_legend: "Solid = driven · dashed grey = budget pace · dashed amber = projection at current rate",
       lease_baseline_auto: "Baseline: auto-detected from history",
-      lease_baseline_manual: "Baseline: {km} km · manually entered",
+      lease_baseline_manual: "Baseline: {km} {unit} · manually entered",
       lease_last_7_days: "Last 7 days",
-      lease_daily_budget: "{km} km/day avg",
-      editor_lease_limit: "Annual lease limit (km, optional)",
+      lease_daily_budget: "{km} {unit}/day avg",
+      editor_lease_limit: "Annual lease limit (km or mi, optional)",
       editor_lease_start_date: "Lease start date (YYYY-MM-DD, optional)",
-      editor_lease_start_odometer: "Odometer at lease start (km, optional — recommended)",
+      editor_lease_start_odometer: "Odometer at lease start (km or mi, optional — recommended)",
       editor_lease_tolerance: "Pace tolerance (%, optional, default 3)",
       editor_lease_pace_basis: "Pace basis",
       lease_basis_today: "Today's tracking (default)",
@@ -192,33 +192,33 @@
       distance_trend: "Körd sträcka · senaste {days}d",
       lease_budget: "Leasingbudget",
       lease_waiting: "Samlar data…",
-      lease_over_limit: "{km} km över gränsen",
-      lease_over_pace: "{km} km över takt",
-      lease_under_pace: "{km} km under takt",
-      lease_over_pace_projected: "Prognos {km} km över vid årsslutet",
-      lease_under_pace_projected: "Prognos {km} km under vid årsslutet",
-      lease_over_pace_rate: "Kör {km} km/dag mer än kvarvarande budget",
-      lease_under_pace_rate: "Kör {km} km/dag mindre än kvarvarande budget",
+      lease_over_limit: "{km} {unit} över gränsen",
+      lease_over_pace: "{km} {unit} över takt",
+      lease_under_pace: "{km} {unit} under takt",
+      lease_over_pace_projected: "Prognos {km} {unit} över vid årsslutet",
+      lease_under_pace_projected: "Prognos {km} {unit} under vid årsslutet",
+      lease_over_pace_rate: "Kör {km} {unit}/dag mer än kvarvarande budget",
+      lease_under_pace_rate: "Kör {km} {unit}/dag mindre än kvarvarande budget",
       lease_on_pace: "I takt",
-      lease_km_left: "km kvar i år",
+      lease_km_left: "{unit} kvar i år",
       lease_days_left: "dagar kvar av leasingår",
       lease_rest_days_inline: " · {days} vilodag(ar) behövs",
       lease_rest_days_label: "vilodagar behövs",
       lease_chart_title: "Årsförbrukning vs. budget",
-      lease_target: "Mål {km} km",
-      lease_projection: "~{km} km i denna takt ({delta} mot mål)",
+      lease_target: "Mål {km} {unit}",
+      lease_projection: "~{km} {unit} i denna takt ({delta} mot mål)",
       lease_collecting_projection_note: " · Samlar mer data innan prognos (dag {day} av {total})",
       lease_start_label: "Start",
       lease_today_label: "Idag",
       lease_end_label: "Slut",
       lease_legend: "Heldragen = körd sträcka · streckad grå = budgettakt · streckad amber = prognos vid nuvarande takt",
       lease_baseline_auto: "Baslinje: automatiskt hittad från historik",
-      lease_baseline_manual: "Baslinje: {km} km · manuellt angiven",
+      lease_baseline_manual: "Baslinje: {km} {unit} · manuellt angiven",
       lease_last_7_days: "Senaste 7 dagarna",
-      lease_daily_budget: "{km} km/dag snitt",
-      editor_lease_limit: "Årlig leasinggräns (km, valfritt)",
+      lease_daily_budget: "{km} {unit}/dag snitt",
+      editor_lease_limit: "Årlig leasinggräns (km eller mi, valfritt)",
       editor_lease_start_date: "Leasingårets startdatum (ÅÅÅÅ-MM-DD, valfritt)",
-      editor_lease_start_odometer: "Mätarställning vid leasingstart (km, valfritt — rekommenderas)",
+      editor_lease_start_odometer: "Mätarställning vid leasingstart (km eller mi, valfritt — rekommenderas)",
       editor_lease_tolerance: "Takttolerans (%, valfritt, standard 3)",
       editor_lease_pace_basis: "Beräkningsgrund för takt",
       lease_basis_today: "Dagens läge (standard)",
@@ -291,6 +291,30 @@
     return raw.replace(/\{([^}]+)\}/g, (m, k) =>
       Object.prototype.hasOwnProperty.call(replacements, k) ? replacements[k] : m
     );
+  }
+
+  // Unit the vehicle's odometer reports ("km" or "mi"). Every distance the card
+  // derives from it (lease budget, distance charts) is shown in that unit. #13
+  function distUnit(hass, d) {
+    const id = d?.sensors?.odometer;
+    return (id && hass?.states?.[id]?.attributes?.unit_of_measurement) || "km";
+  }
+
+  // Value + unit of a numeric entity. Prefers HA's own formatter so the
+  // entity's unit and display precision are honoured; the fallback uses the
+  // entity's unit (not a hard-coded one) and rounds to `decimals`. #13
+  function fmtEntity(hass, st, fallbackUnit, decimals) {
+    if (typeof hass?.formatEntityState === "function") {
+      try {
+        const out = hass.formatEntityState(st);
+        if (out) return out;
+      } catch (e) { /* fall through to the manual format */ }
+    }
+    const num = parseFloat(st.state);
+    if (isNaN(num)) return String(st.state);
+    const f = Math.pow(10, decimals);
+    const unit = st.attributes?.unit_of_measurement ?? fallbackUnit;
+    return unit ? `${Math.round(num * f) / f} ${unit}` : `${Math.round(num * f) / f}`;
   }
 
   function escHtml(str) {
@@ -753,7 +777,7 @@
         const pct = batteryKnown ? Math.max(0, Math.min(100, parseFloat(battery.state) || 0)) : 0;
         const offset = RING_CIRCUMFERENCE * (1 - pct / 100);
         const rangeText = rangeBattery && rangeBattery.state !== "unknown" && rangeBattery.state !== "unavailable"
-          ? `${Math.round(parseFloat(rangeBattery.state))} km`
+          ? fmtEntity(hass, rangeBattery, "km", 0)
           : "—";
         const targetState = state(d.sensors.target_battery_charge_level);
         const targetKnown = !!targetState && targetState.state !== "unknown" && targetState.state !== "unavailable";
@@ -786,7 +810,7 @@
           </div>`;
       } else if (fuel && fuel.state !== "unknown" && fuel.state !== "unavailable") {
         const rangeText = rangeTank && rangeTank.state !== "unknown" && rangeTank.state !== "unavailable"
-          ? `${Math.round(parseFloat(rangeTank.state))} km`
+          ? fmtEntity(hass, rangeTank, "km", 0)
           : "—";
         heroValueHtml = `
           <div class="vc-plain-wrap">
@@ -1026,7 +1050,7 @@
 
       const row = (label, st, unit) => {
         if (!st) return "";
-        const val = isUnknown(st) ? "—" : `${Math.round(parseFloat(st.state))} ${unit}`;
+        const val = isUnknown(st) ? "—" : (unit === null ? fmtEntity(hass, st, "km", 0) : `${Math.round(parseFloat(st.state))} ${unit}`);
         return `<div class="vc-kv"><span class="vc-kv-label">${escHtml(label)}</span><span class="vc-kv-val">${escHtml(val)}</span></div>`;
       };
 
@@ -1043,8 +1067,8 @@
       const detailHtml = expanded ? `
         ${hasServiceData ? `
           <div class="vc-kv-grid" style="margin-top:8px;">
-            ${row(t(hass, "odometer"), odometer, "km")}
-            ${row(t(hass, "distance_to_service"), distService, "km")}
+            ${row(t(hass, "odometer"), odometer, null)}
+            ${row(t(hass, "distance_to_service"), distService, null)}
             ${row(t(hass, "time_to_service"), timeService, t(hass, "days_unit"))}
             ${row(t(hass, "engine_time_to_service"), engineTimeService, t(hass, "hours_unit"))}
           </div>` : ""}
@@ -1079,7 +1103,7 @@
 
       const row = (label, st, unit) => {
         if (!st) return "";
-        const val = isUnknown(st) ? "—" : `${Math.round(parseFloat(st.state) * 10) / 10} ${unit}`;
+        const val = isUnknown(st) ? "—" : fmtEntity(hass, st, unit, 1);
         return `<div class="vc-kv"><span class="vc-kv-label">${escHtml(label)}</span><span class="vc-kv-val">${escHtml(val)}</span></div>`;
       };
 
@@ -1108,7 +1132,7 @@
       return `
         <div class="vc-section">
           <div class="vc-section-title">${escHtml(t(hass, "distance_trend", { days: ODOMETER_DAYS }))}</div>
-          ${this._renderDistanceBars(distances, hass)}
+          ${this._renderDistanceBars(distances, hass, distUnit(hass, d))}
         </div>`;
     }
 
@@ -1117,7 +1141,7 @@
     // visual distortion. All text (axis scale, weekday labels) is rendered
     // as plain HTML around the SVG instead of inline <text>, since text
     // *would* visibly stretch under a "none" transform. See #1/#6.
-    _renderDistanceBars(distances, hass) {
+    _renderDistanceBars(distances, hass, unit = "km") {
       if (!distances.length || distances.every((v) => v === null)) {
         return `<div class="vc-chart-wrap" style="height:64px;"><svg viewBox="0 0 100 100" width="100%" height="100%" class="vc-spark"></svg></div>`;
       }
@@ -1141,14 +1165,14 @@
         if (v === null) return "";
         const x = plotLeft + i * gap + (gap - barW) / 2;
         const y = yAt(v);
-        const title = `<title>${escHtml(dayLabel(i))}: ${Math.round(v)} km</title>`;
+        const title = `<title>${escHtml(dayLabel(i))}: ${Math.round(v)} ${unit}</title>`;
         return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${(plotBottom - y).toFixed(1)}" rx="1.5" fill="var(--info-color, var(--primary-color))">${title}</rect>`;
       }).join("");
 
       const dayLabels = distances.map((_, i) => `<span>${escHtml(dayLabel(i))}</span>`).join("");
 
       return `
-        <div class="vc-chart-yaxis"><span>0–${Math.round(axisMax)} km</span></div>
+        <div class="vc-chart-yaxis"><span>0–${Math.round(axisMax)} ${escHtml(unit)}</span></div>
         <div class="vc-chart-wrap" style="height:64px;">
           <svg viewBox="0 0 100 100" width="100%" height="100%" preserveAspectRatio="none" style="display:block;">${bars}</svg>
         </div>
@@ -1161,13 +1185,14 @@
       if (!lease) return "";
       const deviceId = vehicle.device_id;
       const dev = escHtml(deviceId);
+      const unit = distUnit(hass, d);
       const expanded = !!this._expanded.get(`${deviceId}:lease`);
 
       let summaryHtml;
       if (lease.status !== "ok") {
         summaryHtml = `<span class="vc-expand-summary" style="color:var(--secondary-text-color);">${escHtml(t(hass, "lease_waiting"))}</span>`;
       } else if (lease.overLimit) {
-        summaryHtml = `<span class="vc-expand-summary" style="color:var(--error-color);">${escHtml(t(hass, "lease_over_limit", { km: Math.round(lease.used - lease.limit) }))}</span>`;
+        summaryHtml = `<span class="vc-expand-summary" style="color:var(--error-color);">${escHtml(t(hass, "lease_over_limit", { km: Math.round(lease.used - lease.limit), unit }))}</span>`;
       } else {
         // Surfaced whenever "projected" was configured but there isn't
         // enough real data yet to trust it — the status below is using
@@ -1202,7 +1227,7 @@
             ? `<span class="vc-rest-inline">${escHtml(t(hass, "lease_rest_days_inline", { days: lease.restDaysNeeded }))}</span>`
             : "";
           const color = over ? "var(--warning-color)" : "var(--success-color)";
-          summaryHtml = `<span class="vc-expand-summary" style="color:${color};">${escHtml(t(hass, key, { km }))}${restNote}${collectingNote}</span>`;
+          summaryHtml = `<span class="vc-expand-summary" style="color:${color};">${escHtml(t(hass, key, { km, unit }))}${restNote}${collectingNote}</span>`;
         } else {
           summaryHtml = `<span class="vc-expand-summary" style="color:var(--success-color);">${escHtml(t(hass, "lease_on_pace"))}${collectingNote}</span>`;
         }
@@ -1211,7 +1236,7 @@
       let detailHtml = "";
       if (expanded && lease.status === "ok") {
         const baselineNote = lease.baselineSource === "manual"
-          ? t(hass, "lease_baseline_manual", { km: Math.round(lease.baselineValue) })
+          ? t(hass, "lease_baseline_manual", { km: Math.round(lease.baselineValue), unit })
           : t(hass, "lease_baseline_auto");
         const restTileHtml = lease.paceStatus === "over" && lease.effectivePaceBasis !== "remaining_rate" && lease.projectionReady
           ? `
@@ -1223,8 +1248,8 @@
         detailHtml = `
           <div style="display:flex; gap:20px; margin-top:10px; flex-wrap:wrap;">
             <div>
-              <div style="font-size:20px; font-weight:800; color:var(--primary-text-color); line-height:1;">${escHtml(Math.round(lease.remaining))} km</div>
-              <div style="font-size:11px; color:var(--secondary-text-color); margin-top:3px;">${escHtml(t(hass, "lease_km_left"))}</div>
+              <div style="font-size:20px; font-weight:800; color:var(--primary-text-color); line-height:1;">${escHtml(Math.round(lease.remaining))} ${escHtml(unit)}</div>
+              <div style="font-size:11px; color:var(--secondary-text-color); margin-top:3px;">${escHtml(t(hass, "lease_km_left", { unit }))}</div>
             </div>
             <div>
               <div style="font-size:20px; font-weight:800; color:var(--primary-text-color); line-height:1;">${escHtml(lease.daysLeft)}</div>
@@ -1234,12 +1259,12 @@
           </div>
           <div style="margin-top:12px;">
             <div class="vc-section-title" style="margin-bottom:6px;">${escHtml(t(hass, "lease_chart_title"))}</div>
-            ${this._renderLeaseChart(lease, hass)}
+            ${this._renderLeaseChart(lease, hass, unit)}
             <div style="font-size:10px; color:var(--secondary-text-color); margin-top:2px;">${escHtml(t(hass, "lease_legend"))}</div>
           </div>
           <div style="margin-top:12px;">
             <div class="vc-section-title" style="margin-bottom:6px;">${escHtml(t(hass, "lease_last_7_days"))}</div>
-            ${this._renderLeaseDailyBars(deviceId, lease.limit, hass)}
+            ${this._renderLeaseDailyBars(deviceId, lease.limit, hass, unit)}
           </div>
           <div style="font-size:10.5px; color:var(--secondary-text-color); margin-top:10px;">${escHtml(baselineNote)}</div>
         `;
@@ -1268,7 +1293,7 @@
     // stroke-width uses vector-effect="non-scaling-stroke" so line
     // thickness stays a fixed screen size regardless of the card's actual
     // rendered width/height. See #1/#6.
-    _renderLeaseChart(lease, hass) {
+    _renderLeaseChart(lease, hass, unit = "km") {
       const axisMax = Math.max(lease.limit, lease.projectedTotal, 1) * 1.1;
       const startMs = lease.anniversaryStart.getTime();
       const spanMs = lease.daysInYear * DAY_MS;
@@ -1298,8 +1323,8 @@
         <span class="vc-chart-label" style="left:0; top:${plotBottom}%;">${escHtml(t(hass, "lease_start_label"))}</span>
         <span class="vc-chart-label vc-chart-label-strong" style="left:${todayX.toFixed(1)}%; top:${plotBottom}%; transform:translate(-50%,6px);">${escHtml(t(hass, "lease_today_label"))}</span>
         <span class="vc-chart-label vc-chart-label-right" style="top:${plotBottom}%;">${escHtml(t(hass, "lease_end_label"))}</span>
-        <span class="vc-chart-label vc-chart-label-right" style="top:${budgetY.toFixed(1)}%; transform:translateY(-100%);">${escHtml(t(hass, "lease_target", { km: Math.round(lease.limit) }))}</span>
-        <span class="vc-chart-label vc-chart-label-right" style="top:${projY.toFixed(1)}%; transform:translateY(-100%); color:var(--warning-color);">${escHtml(t(hass, "lease_projection", { km: Math.round(lease.projectedTotal), delta: (lease.projectedOverKm >= 0 ? "+" : "") + Math.round(lease.projectedOverKm) + " km" }))}</span>
+        <span class="vc-chart-label vc-chart-label-right" style="top:${budgetY.toFixed(1)}%; transform:translateY(-100%);">${escHtml(t(hass, "lease_target", { km: Math.round(lease.limit), unit }))}</span>
+        <span class="vc-chart-label vc-chart-label-right" style="top:${projY.toFixed(1)}%; transform:translateY(-100%); color:var(--warning-color);">${escHtml(t(hass, "lease_projection", { km: Math.round(lease.projectedTotal), delta: (lease.projectedOverKm >= 0 ? "+" : "") + Math.round(lease.projectedOverKm) + " " + unit, unit }))}</span>
       `;
 
       return `<div class="vc-chart-wrap" style="height:130px;">${svg}${labels}</div>`;
@@ -1311,7 +1336,7 @@
     // 365) so each bar's color communicates over/under that specific
     // budget, not just a generic trend. Same full-width/HTML-label
     // approach as _renderDistanceBars — see the comment there.
-    _renderLeaseDailyBars(deviceId, annualLimitKm, hass) {
+    _renderLeaseDailyBars(deviceId, annualLimitKm, hass, unit = "km") {
       const distances = this._odoHistory.get(deviceId)?.distances || [];
       const dailyBudget = annualLimitKm / 365;
       if (!distances.length || distances.every((v) => v === null)) {
@@ -1341,7 +1366,7 @@
         const y = yAt(v);
         const overBudget = v > dailyBudget;
         const color = overBudget ? "var(--warning-color)" : "var(--success-color)";
-        const title = `<title>${escHtml(dayLabel(i))}: ${Math.round(v)} km (${overBudget ? "over" : "under"} daily budget)</title>`;
+        const title = `<title>${escHtml(dayLabel(i))}: ${Math.round(v)} ${unit} (${overBudget ? "over" : "under"} daily budget)</title>`;
         return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${(plotBottom - y).toFixed(1)}" rx="1.5" fill="${color}">${title}</rect>`;
       }).join("");
 
@@ -1355,8 +1380,8 @@
 
       return `
         <div class="vc-chart-yaxis">
-          <span>0–${Math.round(axisMax)} km</span>
-          <span>${escHtml(t(hass, "lease_daily_budget", { km: Math.round(dailyBudget * 10) / 10 }))}</span>
+          <span>0–${Math.round(axisMax)} ${escHtml(unit)}</span>
+          <span>${escHtml(t(hass, "lease_daily_budget", { km: Math.round(dailyBudget * 10) / 10, unit }))}</span>
         </div>
         <div class="vc-chart-wrap" style="height:64px;">${svg}</div>
         <div class="vc-chart-daylabels">${dayLabels}</div>`;
@@ -1384,7 +1409,7 @@
       if (!entityId) return "";
       const st = hass.states[entityId];
       const unit = st?.attributes?.unit_of_measurement || "";
-      const valueText = st && st.state !== "unknown" && st.state !== "unavailable" ? `${st.state} ${unit}` : "—";
+      const valueText = st && st.state !== "unknown" && st.state !== "unavailable" ? fmtEntity(hass, st, "", 1) : "—";
       const days = Math.round(this._config.stats_history_hours / 24);
       const history = this._history.get(vehicle.device_id);
       const svg = this._renderSparkline(history, isEv, hass, this._config.stats_history_hours, unit);
