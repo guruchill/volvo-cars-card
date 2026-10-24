@@ -41,13 +41,12 @@ Unlike many custom cards, this one requires no external dependencies — no char
 
 ## Installation
 
-### Via HACS (custom repository)
+### Via HACS
 
-This card isn't in the HACS default catalog yet. Add it as a custom repository:
+1. In HACS, search for **Volvo Cars Card** and install it
+2. Reload your browser.
 
-1. HACS → ⋮ → **Custom repositories**
-2. Repository: `https://github.com/johro897/volvo-cars-card`, Category: **Dashboard**
-3. Install **Volvo Cars Card**, then reload your browser.
+To try a pre-release, open the card in HACS, choose **Redownload** and pick the beta version.
 
 ### Manual install
 
@@ -79,10 +78,12 @@ Use the visual editor (**Edit dashboard → Add card → Volvo Cars Card**) to a
 |---|---|---|---|
 | `vehicles` | list | **required**, at least one | Each entry: `device_id` (required, the HA device for that Volvo), `name` (optional display name override), `icon` (optional, e.g. `mdi:car-electric`, shown next to the name), `picture` (optional image URL shown above the name, e.g. `/local/xc60.jpg`), `lease_annual_limit_km` (optional, enables the Lease budget section, e.g. `20000`; in the unit your odometer reports — km or mi, despite the name), `lease_start_date` (required if the limit is set, `YYYY-MM-DD` — the lease's anniversary date, recomputed every year), `lease_start_odometer_km` (optional but recommended — the odometer reading at the start of the *current* lease year; if omitted, the card tries to auto-detect it from Home Assistant's long-term statistics for the odometer sensor), `lease_pace_tolerance_pct` (optional, default `3` — how many percent of the annual limit counts as "on pace" before the status flips to over/under), `lease_pace_basis` (optional, default `"today"` — `"today"` compares usage-so-far to a proportional target, `"projected"` compares the extrapolated year-end total to the limit instead, `"remaining_rate"` compares your actual recent daily average to the recalculated remaining daily budget) |
 | `show_stats` | boolean | `true` | Show the consumption sparkline section |
+| `show_actions` | boolean | `true` | Show the quick-action buttons (lock, climate, horn/lights, engine) in the hero. `false` hides them and their confirm rows; the lock/climate status text stays. |
 | `stats_history_hours` | integer | `168` (7 days) | How far back the consumption sparkline looks |
 | `layout` | string | `"auto"` | `"auto"` wraps to a single column when the dashboard column is too narrow; `"horizontal"` forces one column per vehicle, side by side, regardless of width; `"vertical"` always stacks vehicles in one column |
 | `title` | string | *(none — auto-translated, "Volvo Cars"/"Volvo Cars")* | Card header text. Set to an empty string to hide the header row entirely. |
 | `section_order` | list of strings | *(the order below)* | Controls the order of the sections below each vehicle's pinned hero (name/battery-fuel ring/quick actions, which is always first). Valid ids: `doors`, `charging`, `service`, `trip`, `position`, `stats`, `distance`, `lease` — default order is exactly that list. Applies to every vehicle in the card. A section a given vehicle doesn't have data for is skipped when rendering regardless of its position; an unknown id is ignored, and any id you leave out is appended after the ones you listed, so nothing is ever silently dropped. Easiest to set from the visual editor's "Section order" list (↑/↓ buttons) rather than by hand. |
+| `hidden_sections` | list of strings | `[]` | Sections to hide entirely (same ids as `section_order`: `doors`, `charging`, `service`, `trip`, `position`, `stats`, `distance`, `lease`). Hidden sections are not rendered and their data is not fetched. Unknown ids are ignored. Easiest to set with the checkbox on each row of the visual editor's "Section order" list. `show_stats: false` still hides `stats` and `distance` as before. |
 
 ```yaml
 type: custom:volvo-cars-card
@@ -188,8 +189,11 @@ No extrapolation and no tolerance band involved — just that day's actual dista
 
 ## Changelog
 
-### Unreleased (beta-1.0.4)
+### 1.1.0 (2026-10-24)
 
+- **Choose which sections are shown** ([#10](https://github.com/johro897/volvo-cars-card/issues/10)): new `hidden_sections` option and a visibility checkbox on each row of the editor's Section order list. Existing configs are unchanged.
+- **Hide the quick-action buttons** ([#11](https://github.com/johro897/volvo-cars-card/issues/11)): new `show_actions` option (default `true`) with an editor checkbox.
+- **Multi-column layout on wide cards** ([#12](https://github.com/johro897/volvo-cars-card/issues/12)): each vehicle now spreads its hero and sections over 2 columns (vehicle width ≥ 560 px) or 3 columns (≥ 840 px), flowing in `section_order`, so a full-width dashboard no longer needs scrolling. Narrow widths (phones, narrow dashboard columns) look exactly as before. No new option.
 - **Distances follow your entities' unit** ([#13](https://github.com/johro897/volvo-cars-card/issues/13)): odometer, distance to service, trip meters, average speed and range no longer assume `km` — they show the unit and display precision of the entity itself (e.g. miles for a UK vehicle). The Lease budget and Distance driven sections use the odometer's unit too, so `lease_annual_limit_km` and `lease_start_odometer_km` are read in whatever unit the odometer reports (the option names keep `_km`). The consumption stat no longer shows raw values like `17.3999996185303`.
 
 ### 1.0.0 (2026-09-21) — First stable release

@@ -540,6 +540,28 @@ cardVertical.hass = hass;
 const gridV = cardVertical.shadowRoot.querySelector(".vc-grid");
 assert("layout: vertical forces a single stacked column", gridV.style.gridTemplateColumns === "1fr");
 
+// --- Multi-column wide layout (#12) ---
+const bodyEl = card.shadowRoot.querySelector(".vc-vehicle > .vc-vehicle-body");
+assert("each vehicle wraps hero + sections in .vc-vehicle-body", !!bodyEl && bodyEl.firstElementChild.classList.contains("vc-hero"));
+const vehicleStyle = getComputedStyle(card.shadowRoot.querySelector(".vc-vehicle"));
+assert(".vc-vehicle is an inline-size container", vehicleStyle.containerType === "inline-size");
+const colsAt = (px) => {
+  const c = document.createElement("volvo-cars-card");
+  c.style.display = "block";
+  c.style.width = px + "px";
+  stage.appendChild(c);
+  c.setConfig({ vehicles: [{ device_id: "dev_xc60" }] });
+  c.hass = hass;
+  const b = c.shadowRoot.querySelector(".vc-vehicle-body");
+  const out = { count: getComputedStyle(b).columnCount, display: getComputedStyle(b).display };
+  c.remove();
+  return out;
+};
+const narrowCols = colsAt(320);
+assert("narrow card keeps the original single flex column", narrowCols.display === "flex" && narrowCols.count === "auto");
+assert("medium card (~600px) uses 2 columns", colsAt(640).count === "2");
+assert("wide card (~1000px) uses 3 columns", colsAt(1000).count === "3");
+
 // --- section_order option test (owner-requested, 2026-09-21) ---
 const defaultOrderHtml = card.shadowRoot.querySelectorAll(".vc-vehicle")[0].innerHTML;
 assert("with no section_order configured, sections still render in the original default order (no regression)", defaultOrderHtml.indexOf("vc-doors-row") < defaultOrderHtml.indexOf("vc-charging"));
@@ -669,6 +691,14 @@ assert("clicking a row's 'down' button fires config-changed with the two ids swa
 const rowsAfterMove = editor.shadowRoot.querySelectorAll(".ed-order-row");
 assert("the editor re-renders to reflect the new order (row 1 unchanged, since only rows 2/3 swapped)", rowsAfterMove[0].querySelector(".ed-order-name").textContent === firstRowName);
 
+// --- hidden_sections editor control (issue #10) ---
+const doorsToggle = editor.shadowRoot.querySelector('[data-action="toggle-section"][data-section-id="doors"]');
+assert("every order row has a visibility toggle", editor.shadowRoot.querySelectorAll('[data-action="toggle-section"]').length === 8);
+doorsToggle.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+assert("clicking a toggle fires config-changed with the id in hidden_sections", Array.isArray(lastConfig.hidden_sections) && lastConfig.hidden_sections.includes("doors"));
+editor.shadowRoot.querySelector('[data-action="toggle-section"][data-section-id="doors"]').dispatchEvent(new MouseEvent("click", { bubbles: true }));
+assert("clicking it again removes the id", !lastConfig.hidden_sections.includes("doors"));
+
 // --- Lease pace tolerance/basis fields (owner-requested, 2026-09-21) ---
 const toleranceInput = editor.shadowRoot.querySelector('[data-field="lease_pace_tolerance_pct"]');
 assert("lease pace tolerance input exists in the vehicle block", !!toleranceInput);
@@ -741,6 +771,31 @@ assert("#13: days/hours rows keep the card's own translated unit (not routed thr
 
 // Default is unchanged: km entities still render as km.
 assert("#13: km entities still render as km (regression)", vehicles[1].innerHTML.includes("560 km"));
+
+// --- hidden_sections card test (issue #10) ---
+const cardHidden = document.createElement("volvo-cars-card");
+stage.appendChild(cardHidden);
+cardHidden.setConfig({ vehicles: [{ device_id: "dev_xc60" }], hidden_sections: ["doors", "not-a-real-id"] });
+cardHidden.hass = hass;
+const hiddenHtml = cardHidden.shadowRoot.querySelectorAll(".vc-vehicle")[0].innerHTML;
+assert("a section listed in hidden_sections is not rendered", !hiddenHtml.includes("vc-doors-row"));
+assert("other sections still render when one is hidden", hiddenHtml.includes("vc-charging"));
+assert("with no hidden_sections the doors section still renders (no regression)", defaultOrderHtml.includes("vc-doors-row"));
+
+// --- show_actions (issue #11) ---
+const cardNoActions = document.createElement("volvo-cars-card");
+stage.appendChild(cardNoActions);
+cardNoActions.setConfig({ vehicles: [{ device_id: "dev_xc60" }], show_actions: false });
+cardNoActions.hass = hass;
+const noActionsHtml = cardNoActions.shadowRoot.querySelectorAll(".vc-vehicle")[0].innerHTML;
+assert("show_actions: false removes the quick-action buttons", !noActionsHtml.includes("vc-action-btn") && !noActionsHtml.includes('class="vc-actions"'));
+assert("show_actions: false keeps the status line", noActionsHtml.includes("vc-status-line"));
+assert("buttons render by default (no regression)", defaultOrderHtml.includes("vc-action-btn"));
+const actionsToggle = editor.shadowRoot.querySelector('[data-field="show_actions"]');
+assert("editor has a show_actions checkbox, checked by default", !!actionsToggle && actionsToggle.checked);
+actionsToggle.checked = false;
+actionsToggle.dispatchEvent(new Event("change", { bubbles: true }));
+assert("unchecking it fires config-changed with show_actions: false", lastConfig.show_actions === false);
 
 // --- Render summary ------------------------------------------------
 const list = document.getElementById("results");
