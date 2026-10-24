@@ -121,6 +121,7 @@
       editor_icon: "Icon (optional)",
       editor_picture: "Photo URL (optional)",
       editor_show_stats: "Show statistics",
+      editor_show_actions: "Show quick-action buttons",
       editor_stats_hours: "Statistics window (hours)",
       editor_select_device: "Select a device…",
       editor_layout: "Layout",
@@ -128,6 +129,8 @@
       layout_horizontal: "Horizontal (side by side)",
       layout_vertical: "Vertical (stacked)",
       editor_section_order: "Section order",
+      editor_section_show: "Show this section",
+      editor_section_hide: "Hide this section",
       section_label_doors: "Doors & windows",
       section_label_charging: "Charging",
       section_label_service: "Service & health",
@@ -253,6 +256,7 @@
       editor_icon: "Ikon (valfritt)",
       editor_picture: "Bild-URL (valfritt)",
       editor_show_stats: "Visa statistik",
+      editor_show_actions: "Visa snabbknappar",
       editor_stats_hours: "Statistikfönster (timmar)",
       editor_select_device: "Välj en enhet…",
       editor_layout: "Layout",
@@ -260,6 +264,8 @@
       layout_horizontal: "Horisontell (sida vid sida)",
       layout_vertical: "Vertikal (staplat)",
       editor_section_order: "Sektionsordning",
+      editor_section_show: "Visa sektionen",
+      editor_section_hide: "Dölj sektionen",
       section_label_doors: "Dörrar & fönster",
       section_label_charging: "Laddning",
       section_label_service: "Service & hälsa",
@@ -395,6 +401,12 @@
     return [...new Set([...known, ...missing])];
   }
 
+  // Keeps only known ids, de-duplicated. Unknown/removed ids are dropped so
+  // a stale config never hides anything by accident.
+  function normalizeHiddenSections(hidden) {
+    return Array.isArray(hidden) ? [...new Set(hidden.filter((id) => SECTION_ORDER_VALUES.has(id)))] : [];
+  }
+
   function localISO(date) {
     const p = (n) => String(n).padStart(2, "0");
     return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}` +
@@ -407,7 +419,7 @@
     }
 
     static getStubConfig() {
-      return { vehicles: [], show_stats: true, layout: "auto", section_order: DEFAULT_SECTION_ORDER };
+      return { vehicles: [], show_stats: true, show_actions: true, layout: "auto", section_order: DEFAULT_SECTION_ORDER, hidden_sections: [] };
     }
 
     constructor() {
@@ -444,6 +456,7 @@
         // header row entirely; anything else is shown verbatim.
         title: typeof config.title === "string" ? config.title : null,
         show_stats: config.show_stats !== false,
+        show_actions: config.show_actions !== false,
         stats_history_hours: Math.min(
           MAX_STATS_HOURS,
           Math.max(1, parseInt(config.stats_history_hours, 10) || DEFAULT_STATS_HOURS)
@@ -454,6 +467,7 @@
         // Normalized so an unknown/removed id never silently drops a
         // section, and an absent/empty config keeps today's fixed order.
         section_order: normalizeSectionOrder(config.section_order),
+        hidden_sections: normalizeHiddenSections(config.hidden_sections),
         vehicles: config.vehicles.map((v) => ({
           device_id: v.device_id,
           name: v.name || "",
@@ -709,7 +723,7 @@
         }
       }
       for (const v of this._config.vehicles) {
-        if (v.lease_annual_limit_km && v.lease_start_date) {
+        if (v.lease_annual_limit_km && v.lease_start_date && !(this._config.hidden_sections || []).includes("lease")) {
           this._maybeRefreshLeaseStats(v);
           // The lease section's own "last 7 days" chart needs the same
           // odometer daily-history data as the general Distance driven
@@ -799,7 +813,10 @@
       const armedRing = (key) => armed === key ? `box-shadow:0 0 0 2px var(--primary-color);` : "";
       const dev = escHtml(vehicle.device_id);
 
+      // `show_actions: false` drops the buttons and their confirm rows; the
+      // lock/climate/engine status line below always stays.
       const buttonsHtml = `
+        ${this._config.show_actions ? `
         <div class="vc-actions">
           ${d.lock ? `
             <button class="vc-action-btn" data-action="arm" data-arm="lock" data-device="${dev}"
@@ -849,7 +866,7 @@
             ${d.buttons.honk ? `<button class="vc-confirm-chip" data-action="honk-horn" data-device="${dev}">${escHtml(t(hass, "honk_horn"))}</button>` : ""}
             ${d.buttons.flash ? `<button class="vc-confirm-chip" data-action="honk-lights" data-device="${dev}">${escHtml(t(hass, "honk_lights"))}</button>` : ""}
             ${d.buttons.honk_flash ? `<button class="vc-confirm-chip" data-action="honk-both" data-device="${dev}">${escHtml(t(hass, "honk_both"))}</button>` : ""}
-          </div>` : ""}
+          </div>` : ""}` : ""}
         <div class="vc-status-line">
           <span style="color:${lockColorVar};">${escHtml(lockLabel)}</span>
           ${climateAvailable && climateOn ? `<span class="vc-status-sep">·</span><span style="color:var(--info-color, var(--primary-color));">${escHtml(t(hass, "climate_on"))}</span>` : ""}
@@ -859,18 +876,23 @@
       // Rendered once each regardless of order (identical cost either way),
       // then assembled below in whatever sequence section_order specifies —
       // reordering never changes what gets computed, only where it lands.
-      const sectionsById = {
-        doors: this._renderDoors(d, hass, vehicle.device_id),
-        charging: this._renderCharging(d, hass),
-        service: this._renderServiceHealth(d, hass, vehicle.device_id),
-        trip: this._renderTripData(d, hass, vehicle.device_id),
-        position: this._renderPosition(d, hass),
-        stats: this._config.show_stats ? this._renderStats(vehicle, d, hass, isEv) : "",
-        distance: this._config.show_stats ? this._renderDistanceTrend(vehicle, d, hass) : "",
-        lease: this._renderLeaseBudget(vehicle, d, hass),
+      // Hidden sections (`hidden_sections`) are skipped before rendering, so
+      // they cost nothing.
+      const hidden = this._config.hidden_sections || [];
+      const showStats = this._config.show_stats;
+      const sectionRenderers = {
+        doors: () => this._renderDoors(d, hass, vehicle.device_id),
+        charging: () => this._renderCharging(d, hass),
+        service: () => this._renderServiceHealth(d, hass, vehicle.device_id),
+        trip: () => this._renderTripData(d, hass, vehicle.device_id),
+        position: () => this._renderPosition(d, hass),
+        stats: () => (showStats ? this._renderStats(vehicle, d, hass, isEv) : ""),
+        distance: () => (showStats ? this._renderDistanceTrend(vehicle, d, hass) : ""),
+        lease: () => this._renderLeaseBudget(vehicle, d, hass),
       };
       const sectionsHtml = (this._config.section_order || DEFAULT_SECTION_ORDER)
-        .map((id) => sectionsById[id] || "")
+        .filter((id) => !hidden.includes(id) && sectionRenderers[id])
+        .map((id) => sectionRenderers[id]() || "")
         .join("");
       const iconHtml = vehicle.icon
         ? `<ha-icon icon="${escHtml(vehicle.icon)}" style="color:var(--primary-text-color); --mdc-icon-size:18px;"></ha-icon>`
@@ -881,18 +903,20 @@
 
       return `
         <div class="vc-vehicle">
-          <div class="vc-hero" style="--vc-glow:${glowVar};">
-            <div class="vc-glow"></div>
-            ${pictureHtml}
-            <div class="vc-hero-name">
-              ${iconHtml}
-              <span class="vc-vehicle-name">${name}</span>
-              <span class="vc-type-pill">${isEv ? "EV" : (fuel ? "ICE" : "")}</span>
+          <div class="vc-vehicle-body">
+            <div class="vc-hero" style="--vc-glow:${glowVar};">
+              <div class="vc-glow"></div>
+              ${pictureHtml}
+              <div class="vc-hero-name">
+                ${iconHtml}
+                <span class="vc-vehicle-name">${name}</span>
+                <span class="vc-type-pill">${isEv ? "EV" : (fuel ? "ICE" : "")}</span>
+              </div>
+              ${heroValueHtml}
+              ${buttonsHtml}
             </div>
-            ${heroValueHtml}
-            ${buttonsHtml}
+            ${sectionsHtml}
           </div>
-          ${sectionsHtml}
         </div>`;
     }
 
@@ -1778,7 +1802,20 @@
           grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
           gap: 16px;
         }
-        .vc-vehicle { display: flex; flex-direction: column; gap: 12px; }
+        /* .vc-vehicle is the size container so the layout reacts to the width
+           each vehicle actually gets (full-width card, or one of several
+           side by side), not the viewport. Narrow = the original single
+           column, unchanged. Wider = CSS columns: hero first, sections flow
+           down column 1, then 2, then 3 in section_order (#12). */
+        .vc-vehicle { container-type: inline-size; }
+        .vc-vehicle-body { display: flex; flex-direction: column; gap: 12px; }
+        @container (min-width: 560px) {
+          .vc-vehicle-body { display: block; column-count: 2; column-gap: 16px; }
+          .vc-vehicle-body > * { break-inside: avoid; margin-bottom: 12px; }
+        }
+        @container (min-width: 840px) {
+          .vc-vehicle-body { column-count: 3; }
+        }
         .vc-hero {
           position: relative;
           border-radius: 16px;
@@ -1888,7 +1925,7 @@
       super();
       this.attachShadow({ mode: "open" });
       this._hass = null;
-      this._config = { vehicles: [], show_stats: true, stats_history_hours: DEFAULT_STATS_HOURS, section_order: DEFAULT_SECTION_ORDER };
+      this._config = { vehicles: [], show_stats: true, show_actions: true, stats_history_hours: DEFAULT_STATS_HOURS, section_order: DEFAULT_SECTION_ORDER, hidden_sections: [] };
       this.shadowRoot.addEventListener("click", (e) => this._onClick(e));
       this.shadowRoot.addEventListener("change", (e) => this._onFieldChange(e));
     }
@@ -1902,9 +1939,11 @@
         ...config,
         title: typeof config?.title === "string" ? config.title : null,
         show_stats: config?.show_stats !== false,
+        show_actions: config?.show_actions !== false,
         stats_history_hours: config?.stats_history_hours || DEFAULT_STATS_HOURS,
         layout: LAYOUT_VALUES.includes(config?.layout) ? config.layout : "auto",
         section_order: normalizeSectionOrder(config?.section_order),
+        hidden_sections: normalizeHiddenSections(config?.hidden_sections),
         vehicles: (config?.vehicles || []).map((v) => ({
           device_id: v.device_id || "",
           name: v.name || "",
@@ -1965,6 +2004,13 @@
         [order[i], order[j]] = [order[j], order[i]];
         this._render();
         this._fireConfigChanged();
+      } else if (action === "toggle-section") {
+        const id = el.dataset.sectionId;
+        const hidden = this._config.hidden_sections;
+        const i = hidden.indexOf(id);
+        if (i === -1) hidden.push(id); else hidden.splice(i, 1);
+        this._render();
+        this._fireConfigChanged();
       }
     }
 
@@ -1976,6 +2022,8 @@
         this._config.title = el.value;
       } else if (field === "show_stats") {
         this._config.show_stats = el.checked;
+      } else if (field === "show_actions") {
+        this._config.show_actions = el.checked;
       } else if (field === "stats_history_hours") {
         this._config.stats_history_hours = parseInt(el.value, 10) || DEFAULT_STATS_HOURS;
       } else if (field === "layout") {
@@ -2041,15 +2089,19 @@
           </div>
         </div>`).join("");
 
-      const sectionOrderRows = this._config.section_order.map((id, i) => `
-        <div class="ed-order-row">
+      const sectionOrderRows = this._config.section_order.map((id, i) => {
+        const isHidden = this._config.hidden_sections.includes(id);
+        return `
+        <div class="ed-order-row" style="${isHidden ? "opacity:0.55;" : ""}">
           <span class="ed-order-num">${i + 1}</span>
+          <button class="ed-order-btn" type="button" data-action="toggle-section" data-section-id="${id}" aria-pressed="${isHidden ? "false" : "true"}" title="${escHtml(t(hass, isHidden ? "editor_section_show" : "editor_section_hide"))}">${isHidden ? "&#9744;" : "&#9745;"}</button>
           <span class="ed-order-name">${escHtml(t(hass, `section_label_${id}`))}</span>
           <div class="ed-row" style="flex:0 0 auto; gap:4px;">
             <button class="ed-order-btn" type="button" data-action="move-section-up" data-section-id="${id}" ${i === 0 ? "disabled" : ""} title="${escHtml(t(hass, "editor_section_order"))}">&#9650;</button>
             <button class="ed-order-btn" type="button" data-action="move-section-down" data-section-id="${id}" ${i === this._config.section_order.length - 1 ? "disabled" : ""} title="${escHtml(t(hass, "editor_section_order"))}">&#9660;</button>
           </div>
-        </div>`).join("");
+        </div>`;
+      }).join("");
 
       this.shadowRoot.innerHTML = `
         <style>
@@ -2080,6 +2132,7 @@
             background: var(--card-background-color); color: var(--secondary-text-color); cursor: pointer;
           }
           .ed-order-btn:disabled { opacity: 0.35; cursor: default; }
+          .ed-order-btn { min-width: 44px; min-height: 44px; }
         </style>
         <div class="ed-wrap">
           <div class="ed-toggle-row" style="margin-top:0;">
@@ -2092,6 +2145,10 @@
           <div class="ed-toggle-row">
             <input type="checkbox" data-field="show_stats" ${this._config.show_stats ? "checked" : ""} />
             <span class="ed-label">${escHtml(t(hass, "editor_show_stats"))}</span>
+          </div>
+          <div class="ed-toggle-row">
+            <input type="checkbox" data-field="show_actions" ${this._config.show_actions ? "checked" : ""} />
+            <span class="ed-label">${escHtml(t(hass, "editor_show_actions"))}</span>
           </div>
           <div class="ed-toggle-row">
             <span class="ed-label">${escHtml(t(hass, "editor_stats_hours"))}</span>
