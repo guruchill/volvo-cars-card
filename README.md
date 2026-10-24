@@ -41,13 +41,12 @@ Unlike many custom cards, this one requires no external dependencies — no char
 
 ## Installation
 
-### Via HACS (custom repository)
+### Via HACS
 
-This card isn't in the HACS default catalog yet. Add it as a custom repository:
+1. In HACS, search for **Volvo Cars Card** and install it
+2. Reload your browser.
 
-1. HACS → ⋮ → **Custom repositories**
-2. Repository: `https://github.com/johro897/volvo-cars-card`, Category: **Dashboard**
-3. Install **Volvo Cars Card**, then reload your browser.
+To try a pre-release, open the card in HACS, choose **Redownload** and pick the beta version.
 
 ### Manual install
 
